@@ -116,7 +116,7 @@ load(conInput).asEdges {
 }
 ```	
 
-It loads the vertex and edge details and then maps and creates first the sensor verticies and then the connection edges. The following script will run this mapping script using the DSE Graph Loader;
+It loads the vertex and edge details and then maps and creates first the sensor verticies and then the connection edges. The following script will run this mapping script using the DSE Graph Loader. However, before you run it make sure the paths in the load.sh and geoLoadJson.groovy scripts reflect those in your environment.
 
 ```
 #!/bin/bash
