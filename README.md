@@ -42,6 +42,7 @@ If you have already created the graph and simply want to erase it and start agai
 :remote config alias g ExampleGeo.g
 g.V().drop().iterate()
 schema.clear()
+system.graph('ExampleGeo').drop()
 ```
 
 Here is the graph schema that will be created by the load command above.
