@@ -4,13 +4,27 @@ A key property of some graph data is geo-spacial information and this can often 
 
 First lets take a look at some input data;
 
-Connections between sensors
-
+Sensor to point reading connection;
 ```
-{"out_id": "0","in_id": "1"}
-{"out_id": "0","in_id": "2"}
+{"name": "PT4450","id": "0"}
 ```
-
+Sensor to region reading connection;
+```
+{"name": "RG4450","id": "1"}
+```
+Sensors;
+```
+"name": "PT4450"}
+{"name": "RG4450"}
+```
+Point reading;
+```
+{"id": "0","loc": "POINT(25.955 15.187)","time": "2016-01-11T03:15:24.000Z","level": "34"}
+```
+Region reading;
+```
+{"id": "1","reg": "POLYGON((0 0, 0 10, 10 10, 10 00, 0 0))","time": "2016-01-11T03:15:24.000Z","level": "34"}
+```
 One thing to note here is that the geo-point sytax. There is a space between the X and Y coordinates.
 
 The graph we are going to load the JSON data into is pretty simple, in fact it only contains one vertex type and one edge type.
@@ -46,45 +60,33 @@ system.graph('ExampleGeo').drop()
 ```
 
 Here is the graph schema that will be created by the load command above.
-
 ```
 // Create the schema with vertices and edges with associated labels and properties
  
 // Properties
-schema.propertyKey('pt::level').Int().create()
-schema.propertyKey('pt::id').Text().create()
-schema.propertyKey('pt::loc').Point().create()
-schema.propertyKey('pt::time').Timestamp().create()
+schema.propertyKey('level').Int().create()
+schema.propertyKey('name').Text().create()
+schema.propertyKey('id').Text().create()
+schema.propertyKey('loc').Point().create()
+schema.propertyKey('reg').Polygon().create()
+schema.propertyKey('time').Timestamp().create()
  
 // Verticies 
-schema.vertexLabel('sensor').properties('pt::level','pt::id','pt::loc','pt::time').create()
+schema.vertexLabel('sensor').properties('name').create()
+schema.vertexLabel('locReading').properties('level','id','loc','time').create()
+schema.vertexLabel('regReading').properties('level','id','reg','time').create()
 
 // Edges 
-schema.edgeLabel('connection').connection('sensor','sensor').create()
+schema.edgeLabel('hasPoint').connection('sensor','locReading').create()
+schema.edgeLabel('hasRegion').connection('sensor','regReading').create()
 
 // Index for Geo search
-schema.vertexLabel('sensor').index('search').search().by('pt::loc').ifNotExists().add()
+schema.vertexLabel('locReading').index('search').search().by('loc').ifNotExists().add()
+// Indexes on polygons are not supported at the moment 
+// schema.vertexLabel('regReading').index('search').search().by('reg').ifNotExists().add()
 ```
-
-Note the index statement at the end of the schema creation the uses DSE Search to index the geo points.
-
-This data can be loaded into DSE Graph using the DSE Graph Loader. To map he JSON data to graph schema a mapping script is used;
-
+And here is the loading and mapping script used by the DSE Graph Loader;
 ```
-/* SAMPLE INPUT
-{
-   "pt::level": "20",
-   "pt::id": "0",
-   "pt::loc": "POINT(88.42 33.49)",
-   "pt::time": "2016-01-11T03:15:24.000Z"
-}
-
-{
-   "in_id": "20",
-   "out_id": "0"
-}
-*/
-
 // Configures the data loader to create the schema
 config preparation: false 
 config create_schema: false 
@@ -94,30 +96,56 @@ config load_vertex_threads: 2
 config batch_size: 10
  
 // Defines the data input source 
-inputFileDir = '/Users/davidfelcey/demos/geo-graph-test/';
+inputFileDir = '/Users/davidfelcey/demos/dse-geo-graph/';
 senInput = File.json(inputFileDir + 'sen.json')
-conInput = File.json(inputFileDir + 'con.json')
+senPtInput = File.json(inputFileDir + 'sen_pt.json')
+senRegInput = File.json(inputFileDir + 'sen_reg.json')
+conPtInput = File.json(inputFileDir + 'con_pt.json')
+conRegInput = File.json(inputFileDir + 'con_reg.json')
 
 // Defines the mapping from input file and loads graph
+
 load(senInput).asVertices {
     label "sensor"
-    key "pt::id"
+    key "name"
 }
 
-load(conInput).asEdges {
-    label "connection"
-    outV "out_id", {
+load(senPtInput).asVertices {
+    label "locReading"
+    key "id"
+}
+
+load(senRegInput).asVertices {
+    label "regReading"
+    key "id"
+}
+
+load(conPtInput).asEdges {
+    label "hasPoint"
+    outV "name", {
         label "sensor"
-	key "pt::id"
+	key "name"
     }
-    inV "in_id", {
-	label "sensor"
-	key "pt::id" 
+    inV "id", {
+	label "locReading"
+	key "id" 
+    }
+}
+	
+load(conRegInput).asEdges {
+    label "hasRegion"
+    outV "name", {
+        label "sensor"
+	key "name"
+    }
+    inV "id", {
+	label "regReading"
+	key "id" 
     }
 }
 ```	
 
-It loads the vertex and edge details and then maps and creates first the sensor verticies and then the connection edges. The following script will run this mapping script using the DSE Graph Loader. However, before you run it make sure the paths in the load.sh and geoLoadJson.groovy scripts reflect those in your environment.
+It loads the verticies and edges and then maps readings to sesnors. The following script will run this mapping script using the DSE Graph Loader. However, before you run it make sure the paths in the load.sh and geoLoadJson.groovy scripts reflect those in your environment.
 
 ```
 #!/bin/bash
