@@ -20,7 +20,7 @@ Sensors;
 Point reading;
 ```json
 {"id": "0","loc": "POINT(25.955 15.187)","time": "2016-01-11T03:15:24.000Z","level": "34"}
-```json
+```
 Region reading;
 ```json
 {"id": "1","reg": "POLYGON((0 0, 0 10, 10 10, 10 00, 0 0))","time": "2016-01-11T03:15:24.000Z","level": "34"}
