@@ -30,35 +30,27 @@ One thing to note here is that the geo-point sytax. There is a space between the
 The graph we are going to load the JSON data into is pretty simple, in fact it only contains one vertex type and one edge type.
 
 To create your graph you need to first start DSE Graph;
-
 ```
 <DSE Home Dir>/bin/dse cassandra -k -s -g -f
 ```
-
 Once DSE has started start the Gremlin console;
-
 ```
 <DSE Home>/bin/dse gremlin-console
 ```
-
 In the Gremlin console, create the ExampleGeo graph as follows;
-
 ```
 system.graph('ExampleGeo').create()
 :remote config alias g ExampleGeo.g
 :load <full path>/geoSchema.groovy
 schema.describe()
 ```
-
 If you have already created the graph and simply want to erase it and start again you do this as follows;
-
 ```
 :remote config alias g ExampleGeo.g
 g.V().drop().iterate()
 schema.clear()
 system.graph('ExampleGeo').drop()
 ```
-
 Here is the graph schema that will be created by the load command above.
 ```
 // Create the schema with vertices and edges with associated labels and properties
@@ -144,9 +136,7 @@ load(conRegInput).asEdges {
     }
 }
 ```	
-
 It loads the verticies and edges and then maps readings to sesnors. The following script will run this mapping script using the DSE Graph Loader. However, before you run it make sure the paths in the load.sh and geoLoadJson.groovy scripts reflect those in your environment.
-
 ```
 #!/bin/bash
 
@@ -154,20 +144,13 @@ GRAPH_LOADER_HOME=/Users/davidfelcey/dse503/dse-graph-loader-5.0.3
 
 $GRAPH_LOADER_HOME/graphloader geoLoadJson.groovy -graph ExampleGeo \
   -address localhost -load_failure_log load.log
-
-Once the loading is complete geo-spacial queries can be run against the graph,
-
-gremlin> g.V().has("sensor", "pt::loc", Geo.inside(Geo.distance(50, 30, 10))).profile()
-==>Traversal Metrics
-Step                                                               Count  Traversers       Time (ms)    % Dur
-=============================================================================================================
-DsegGraphStep([~label.=(sensor), pt::loc.inside...                                            19.009   100.00
-  query-optimizer                                                                              0.600
-  query-setup                                                                                  0.013
-  index-query                                                                                 16.279
-                                            >TOTAL                     -           -          19.009        -
-
 ```
-
+Once the loading is complete geo-spacial queries can be run against the graph,
+```
+gremlin> g.V().hasLabel('sensor').out('hasRegion').has('reg', Geo.inside(Geo.polygon(0.0,0.0,0.0,100.0,100.0,100.0,100.0,0.0)))
+==>v[{~label=regReading, community_id=1834997120, member_id=0}]
+gremlin> g.V().hasLabel('sensor').out('hasPoint').has('loc', Geo.inside(Geo.distance(10,30,50)))
+==>v[{~label=locReading, community_id=436806144, member_id=0}]
+```
 I hope this brief over view of the geo-spatial features of DSE Graph has been helpful and will trigger some insteresting applications.
 
