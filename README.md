@@ -5,24 +5,24 @@ A key property of some graph data is geo-spacial information and this can often 
 First lets take a look at some input data;
 
 Sensor to point reading connection;
-```
+```json
 {"name": "PT4450","id": "0"}
 ```
 Sensor to region reading connection;
-```
+```json
 {"name": "RG4450","id": "1"}
 ```
 Sensors;
-```
+```json
 {"name": "PT4450"}
 {"name": "RG4450"}
 ```
 Point reading;
-```
+```json
 {"id": "0","loc": "POINT(25.955 15.187)","time": "2016-01-11T03:15:24.000Z","level": "34"}
-```
+```json
 Region reading;
-```
+```json
 {"id": "1","reg": "POLYGON((0 0, 0 10, 10 10, 10 00, 0 0))","time": "2016-01-11T03:15:24.000Z","level": "34"}
 ```
 One thing to note here is that the geo-point sytax. There is a space between the X and Y coordinates.
@@ -30,12 +30,12 @@ One thing to note here is that the geo-point sytax. There is a space between the
 The graph we are going to load the JSON data into is pretty simple, in fact it only contains one vertex type and one edge type.
 
 To create your graph you need to first start DSE Graph;
-```
-<DSE Home Dir>/bin/dse cassandra -k -s -g -f
+```bash
+$DSE_HOME/bin/dse cassandra -k -s -g -f
 ```
 Once DSE has started start the Gremlin console;
-```
-<DSE Home>/bin/dse gremlin-console
+```bash
+$DSE_HOME/bin/dse gremlin-console
 ```
 In the Gremlin console, create the ExampleGeo graph as follows;
 ```
@@ -137,7 +137,7 @@ load(conRegInput).asEdges {
 }
 ```	
 It loads the verticies and edges and then maps readings to sesnors. The following script will run this mapping script using the DSE Graph Loader. However, before you run it make sure the paths in the load.sh and geoLoadJson.groovy scripts reflect those in your environment.
-```
+```bash
 #!/bin/bash
 
 GRAPH_LOADER_HOME=/Users/davidfelcey/dse503/dse-graph-loader-5.0.3
