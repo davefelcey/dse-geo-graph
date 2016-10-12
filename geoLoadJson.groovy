@@ -1,14 +1,26 @@
 /* SAMPLE INPUT
+// Point reading
 {
-   "pt::level": "20",
-   "pt::id": "0",
-   "pt::loc": "POINT(88.42 33.49)",
-   "pt::time": "2016-01-11T03:15:24.000Z"
+   "level": "20",
+   "id": "0",
+   "loc": "POINT(88.42 33.49)",
+   "time": "2016-01-11T03:15:24.000Z"
 }
-
+// Region reading 
 {
-   "in_id": "20",
-   "out_id": "0"
+   "level": "20",
+   "id": "1",
+   "region": "POLYGON(1.0 2.0 5.0 4.0)",
+   "time": "2016-01-11T03:15:24.000Z"
+}
+// Sensor 
+{
+   "name": "FRT556Y"
+}
+// Sensor reading connections 
+{
+   "name": "FRT556Y",
+   "id": "0"
 }
 */
 
@@ -21,25 +33,51 @@ config load_vertex_threads: 2
 config batch_size: 10
  
 // Defines the data input source 
-inputFileDir = '/Users/davidfelcey/demos/geo-graph-test/';
+inputFileDir = '/Users/davidfelcey/demos/dse-geo-graph/';
 senInput = File.json(inputFileDir + 'sen.json')
-conInput = File.json(inputFileDir + 'con.json')
+senPtInput = File.json(inputFileDir + 'sen_pt.json')
+senRegInput = File.json(inputFileDir + 'sen_reg.json')
+conPtInput = File.json(inputFileDir + 'con_pt.json')
+conRegInput = File.json(inputFileDir + 'con_reg.json')
 
 // Defines the mapping from input file and loads graph
+
 load(senInput).asVertices {
     label "sensor"
-    key "pt::id"
+    key "name"
 }
 
-load(conInput).asEdges {
-    label "connection"
-    outV "out_id", {
+load(senPtInput).asVertices {
+    label "locReading"
+    key "id"
+}
+
+load(senRegInput).asVertices {
+    label "regReading"
+    key "id"
+}
+
+load(conPtInput).asEdges {
+    label "hasPoint"
+    outV "name", {
         label "sensor"
-	key "pt::id"
+	key "name"
     }
-    inV "in_id", {
-	label "sensor"
-	key "pt::id" 
+    inV "id", {
+	label "locReading"
+	key "id" 
+    }
+}
+	
+load(conRegInput).asEdges {
+    label "hasRegion"
+    outV "name", {
+        label "sensor"
+	key "name"
+    }
+    inV "id", {
+	label "regReading"
+	key "id" 
     }
 }
 	
