@@ -14,7 +14,7 @@ Sensor to region reading connection;
 ```
 Sensors;
 ```
-"name": "PT4450"}
+{"name": "PT4450"}
 {"name": "RG4450"}
 ```
 Point reading;
