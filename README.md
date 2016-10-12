@@ -1,4 +1,4 @@
-# Loading JSON geo-spactial Data into DSE Graph to perform geo-spacial queries using Gremlin and DSE Search for indexing
+# Loading JSON geo-spactial data into DSE Graph to perform geo-spacial queries using Gremlin and DSE Search for indexing
 
 A key property of some graph data is geo-spacial information and this can often arrive in a Json format. This example shows how the DSE Graph Loader can be used to load geo-spacial JSON data into DSE Graph. It also shows how simple it is to use the DSE Search function to index and perform geo queries against the graph vertices.
 
