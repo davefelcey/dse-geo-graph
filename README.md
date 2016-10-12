@@ -152,5 +152,5 @@ gremlin> g.V().hasLabel('sensor').out('hasRegion').has('reg', Geo.inside(Geo.pol
 gremlin> g.V().hasLabel('sensor').out('hasPoint').has('loc', Geo.inside(Geo.distance(10,30,50)))
 ==>v[{~label=locReading, community_id=436806144, member_id=0}]
 ```
-I hope this brief over view of the geo-spatial features of DSE Graph has been helpful and will trigger some insteresting applications.
+I hope this brief over view of the geo-spatial features of DSE Graph has been helpful and will trigger some insteresting applications. I'd also like to thank Sebastián Estévez and Marc Selwan for their help, and if you want to see other geo-spatial queries checkout Sebastián's github repo [here](https://gist.github.com/phact/f4669dec9b71a52f7c20971b43f62693)
 
